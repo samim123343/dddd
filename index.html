@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cashbook App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Unity Ads Script -->
+    <script src="https://cdn.unityads.unity3d.com/unity-ads.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Header with Wallets -->
+        <header class="header">
+            <!-- Unity Ads Banner -->
+            <div class="ad-container">
+                <div id="unity-ad-banner"></div>
+            </div>
+            <div class="wallets">
+                <div class="wallet active">
+                    <h3>Main Wallet</h3>
+                    <p class="balance">৳0.00</p>
+                </div>
+                <div class="wallet">
+                    <h3>Savings</h3>
+                    <p class="balance">৳0.00</p>
+                </div>
+                <div class="wallet">
+                    <h3>Business</h3>
+                    <p class="balance">৳0.00</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Week</button>
+            <button class="filter-btn">Month</button>
+            <button class="filter-btn">Year</button>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="transaction-history">
+            <h2>Transaction History</h2>
+            <div class="transactions" id="transactions">
+                <!-- Transactions will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="cash-in-btn" id="cashInBtn">
+                <i class="fas fa-plus"></i> Cash In
+            </button>
+            <button class="cash-out-btn" id="cashOutBtn">
+                <i class="fas fa-minus"></i> Cash Out
+            </button>
+        </div>
+
+        <!-- Cash In/Out Form Modal -->
+        <div class="modal" id="transactionModal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeModal">&times;</span>
+                <h2 id="modalTitle">Cash In</h2>
+                <form id="transactionForm">
+                    <div class="form-group">
+                        <label for="amount">Amount (৳)</label>
+                        <input type="number" id="amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <div class="category-container">
+                            <select id="category" required>
+                                <option value="">Select Category</option>
+                                <option value="salary">Salary</option>
+                                <option value="business">Business</option>
+                                <option value="food">Food</option>
+                                <option value="transport">Transport</option>
+                                <option value="shopping">Shopping</option>
+                            </select>
+                            <button type="button" class="add-category-btn" id="addCategoryBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Available Categories</label>
+                        <div class="category-list" id="categoryList">
+                            <!-- Categories will be added here dynamically -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
