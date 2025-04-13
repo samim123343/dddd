@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Book - History</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Unity Ads SDK -->
+    <script src="https://webview.unityads.unity3d.com/webview/3.0.0/webview.js"></script>
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .header-icon {
+            font-size: 12px;
+            padding: 6px;
+            color: #666;
+        }
+        .back-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .mini-wallet {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .wallet-icon {
+            color: #4CAF50;
+            font-size: 14px;
+        }
+        .wallet-amount {
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+        }
+        .search-icon {
+            font-size: 12px;
+            padding: 6px;
+            color: #666;
+        }
+        .print-icon {
+            font-size: 12px;
+            padding: 6px;
+            color: #666;
+            margin-left: auto;
+        }
+        .transaction-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        .transaction-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .transaction-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .transaction-amount {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .transaction-amount.income {
+            color: #4CAF50;
+        }
+        .transaction-amount.expense {
+            color: #F44336;
+        }
+        .transaction-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        .transaction-date {
+            color: #666;
+            font-size: 12px;
+        }
+        .transaction-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .action-btn.view {
+            color: #2196F3;
+        }
+        .action-btn.share {
+            color: #4CAF50;
+        }
+        .action-btn.delete {
+            color: #F44336;
+        }
+        .header-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            margin-left: 10px;
+        }
+        .header-search input {
+            border: none;
+            background: none;
+            outline: none;
+            width: 120px;
+            font-size: 12px;
+        }
+        .filter-section {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        .filter-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            background: #E3F2FD;
+            color: #1976D2;
+        }
+        .filter-btn.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        }
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .type-switch {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .switch-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .switch-btn.all {
+            background: #E3F2FD;
+            color: #1976D2;
+        }
+        .switch-btn.all.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        }
+        .switch-btn.income {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+        .switch-btn.income.active {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+        }
+        .switch-btn.expense {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+        .switch-btn.expense.active {
+            background: #F44336;
+            color: white;
+            box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+        }
+        .view-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .view-modal.show {
+            opacity: 1;
+        }
+        .view-content {
+            background: white;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        .view-modal.show .view-content {
+            transform: translateY(0);
+        }
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .view-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        .close-btn:hover {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .view-details {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
+        .detail-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .detail-value {
+            font-weight: bold;
+            color: #333;
+        }
+        .share-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .share-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .share-btn.whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        .share-btn.facebook {
+            background: #1877F2;
+            color: white;
+        }
+        .share-btn.twitter {
+            background: #1DA1F2;
+            color: white;
+        }
+        .share-btn.email {
+            background: #4285F4;
+            color: white;
+        }
+        .chart-section {
+            display: none;
+        }
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .transaction-info {
+            flex: 1;
+        }
+        .transaction-description {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+        .transaction-date {
+            color: #666;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .transaction-amount {
+            font-weight: bold;
+            font-size: 14px;
+            margin: 0 15px;
+        }
+        .transaction-amount.income {
+            color: #4CAF50;
+        }
+        .transaction-amount.expense {
+            color: #F44336;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .action-btn.delete {
+            color: #F44336;
+            background: #FFEBEE;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .action-btn.delete:hover {
+            background: #F44336;
+            color: white;
+        }
+        .transactions-list {
+            margin-top: 5px;
+            background: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+        .transaction-item {
+            background: #fff;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Back Button, Wallet, Search, and Print Button -->
+        <header class="header">
+            <div class="header-left">
+                <button class="back-icon header-icon" onclick="window.location.href='index.html'">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="mini-wallet">
+                    <div class="wallet-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="wallet-amount" id="totalBalance">₹0.00</div>
+                </div>
+                <div class="header-search">
+                    <i class="fas fa-search" style="font-size: 12px; color: #666;"></i>
+                    <input type="text" id="headerSearch" placeholder="Search...">
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="print-icon" onclick="printHistory()">
+                    <i class="fas fa-print"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-container">
+                <button class="filter-btn active" onclick="filterByTime('all')">All</button>
+                <button class="filter-btn" onclick="filterByTime('daily')">Daily</button>
+                <button class="filter-btn" onclick="filterByTime('week')">Week</button>
+                <button class="filter-btn" onclick="filterByTime('month')">Month</button>
+                <button class="filter-btn" onclick="filterByTime('year')">Year</button>
+                <div class="type-switch">
+                    <button class="switch-btn all active" onclick="switchType('all')">All</button>
+                    <button class="switch-btn income" onclick="switchType('income')">Income</button>
+                    <button class="switch-btn expense" onclick="switchType('expense')">Expense</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions List -->
+        <div class="transactions-list-container">
+            <div class="transactions-header">
+                <h3>All Transactions</h3>
+                <div class="transaction-count" id="transactionCount">0 entries</div>
+            </div>
+            <div class="transactions-list" id="transactionsList">
+                <!-- Transactions will be dynamically added here -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- View Modal -->
+    <div class="view-modal" id="viewModal">
+        <div class="view-content">
+            <div class="view-header">
+                <h3>Transaction Details</h3>
+                <button class="close-btn" onclick="closeViewModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="transactionDetails">
+                <!-- Transaction details will be shown here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="Storage.js"></script>
+    <script>
+        // Unity Ads initialization
+        function initUnityAds() {
+            UnityAds.initialize("5801296", false); // false for production mode
+        }
+
+        // Show Unity Ad
+        function showUnityAd() {
+            if (UnityAds.isReady()) {
+                UnityAds.show("video");
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initUnityAds();
+            // Get initial balance from localStorage
+            const savedBalance = localStorage.getItem('currentBalance');
+            if (savedBalance) {
+                document.getElementById('totalBalance').textContent = 
+                    '₹' + parseFloat(savedBalance).toLocaleString('en-IN');
+            }
+            
+            // Set up filter change listener
+            document.getElementById('filterSelect').addEventListener('change', filterTransactions);
+            
+            // Show all transactions by default
+            const allButton = document.querySelector('.switch-btn.all');
+            if (allButton) {
+                allButton.click();
+            }
+            
+            // Initial display of all transactions
+            const transactions = Storage.getAllTransactions();
+            displayTransactions(transactions);
+            
+            setupSearch();
+        });
+
+        function updateTotalBalance() {
+            const transactions = Storage.getAllTransactions();
+            const balance = transactions.reduce((total, t) => {
+                return total + (t.category === 'income' ? parseFloat(t.amount) : -parseFloat(t.amount));
+            }, 0);
+            
+            // Update the wallet balance display
+            const walletAmount = document.getElementById('totalBalance');
+            walletAmount.textContent = '₹' + balance.toLocaleString('en-IN');
+            
+            // Update the balance in localStorage to sync with home page
+            localStorage.setItem('currentBalance', balance.toString());
+        }
+
+        // Update balance every second
+        setInterval(() => {
+            updateTotalBalance();
+        }, 1000);
+
+        function updateTransactionsList() {
+            const transactions = Storage.getAllTransactions()
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const listContainer = document.getElementById('transactionsList');
+            listContainer.innerHTML = '';
+            
+            document.getElementById('transactionCount').textContent = 
+                `${transactions.length} entries`;
+
+            transactions.forEach(transaction => {
+                const transactionElement = document.createElement('div');
+                transactionElement.className = `transaction-item ${transaction.category}`;
+                
+                const date = new Date(transaction.date).toLocaleDateString();
+                const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                    style: 'currency',
+                    currency: 'INR'
+                });
+
+                transactionElement.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="transaction-description">${transaction.description}</div>
+                        <div class="transaction-date">${date}</div>
+                    </div>
+                    <div class="transaction-amount ${transaction.category}">
+                        ${amount}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn delete" onclick="deleteTransaction('${transaction.date}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+
+                listContainer.appendChild(transactionElement);
+            });
+
+            // Update balance after updating transactions
+            updateTotalBalance();
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const transactions = document.querySelectorAll('.transaction-card');
+                
+                transactions.forEach(transaction => {
+                    const title = transaction.querySelector('.transaction-title').textContent.toLowerCase();
+                    const amount = transaction.querySelector('.transaction-amount').textContent.toLowerCase();
+                    const date = transaction.querySelector('.transaction-date').textContent.toLowerCase();
+                    
+                    if (title.includes(searchTerm) || amount.includes(searchTerm) || date.includes(searchTerm)) {
+                        transaction.style.display = '';
+                    } else {
+                        transaction.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        function viewTransaction(id) {
+            const transaction = Storage.getTransaction(id);
+            if (!transaction) return;
+
+            const modal = document.getElementById('viewModal');
+            const details = document.getElementById('transactionDetails');
+            
+            const date = new Date(transaction.date).toLocaleDateString();
+            const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+            });
+
+            details.innerHTML = `
+                <div class="view-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Description:</span>
+                        <span class="detail-value">${transaction.description}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Amount:</span>
+                        <span class="detail-value ${transaction.category}">${amount}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Date:</span>
+                        <span class="detail-value">${date}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Type:</span>
+                        <span class="detail-value">${transaction.category}</span>
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function shareTransaction(id) {
+            const transaction = Storage.getTransaction(id);
+            if (!transaction) return;
+
+            const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+            });
+            const date = new Date(transaction.date).toLocaleDateString();
+            
+            const message = `Transaction Details:\n\n` +
+                          `Description: ${transaction.description}\n` +
+                          `Amount: ${amount}\n` +
+                          `Type: ${transaction.category}\n` +
+                          `Date: ${date}`;
+
+            // Show share options modal
+            const modal = document.getElementById('viewModal');
+            const details = document.getElementById('transactionDetails');
+            
+            details.innerHTML = `
+                <div class="view-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Description:</span>
+                        <span class="detail-value">${transaction.description}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Amount:</span>
+                        <span class="detail-value ${transaction.category}">${amount}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Date:</span>
+                        <span class="detail-value">${date}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Type:</span>
+                        <span class="detail-value">${transaction.category}</span>
+                    </div>
+                </div>
+                <div class="share-options">
+                    <button class="share-btn whatsapp" onclick="shareViaWhatsApp('${id}')">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button class="share-btn facebook" onclick="shareViaFacebook('${id}')">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </button>
+                    <button class="share-btn twitter" onclick="shareViaTwitter('${id}')">
+                        <i class="fab fa-twitter"></i> Twitter
+                    </button>
+                    <button class="share-btn email" onclick="shareViaEmail('${id}')">
+                        <i class="fas fa-envelope"></i> Email
+                    </button>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeViewModal() {
+            const modal = document.getElementById('viewModal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function shareViaWhatsApp(id) {
+            const transaction = Storage.getTransaction(id);
+            if (!transaction) return;
+
+            const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+            });
+            const date = new Date(transaction.date).toLocaleDateString();
+            
+            const message = `Transaction Details:\n\n` +
+                          `Description: ${transaction.description}\n` +
+                          `Amount: ${amount}\n` +
+                          `Type: ${transaction.category}\n` +
+                          `Date: ${date}`;
+
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+            closeViewModal();
+        }
+
+        function shareViaFacebook(id) {
+            const transaction = Storage.getTransaction(id);
+            if (!transaction) return;
+
+            const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+            });
+            const date = new Date(transaction.date).toLocaleDateString();
+            
+            const message = `Transaction Details:\n\n` +
+                          `Description: ${transaction.description}\n` +
+                          `Amount: ${amount}\n` +
+                          `Type: ${transaction.category}\n` +
+                          `Date: ${date}`;
+
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(message)}`;
+            window.open(facebookUrl, '_blank');
+            closeViewModal();
+        }
+
+        function shareViaTwitter(id) {
+            const transaction = Storage.getTransaction(id);
+            if (!transaction) return;
+
+            const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+            });
+            const date = new Date(transaction.date).toLocaleDateString();
+            
+            const message = `Transaction Details:\n\n` +
+                          `Description: ${transaction.description}\n` +
+                          `Amount: ${amount}\n` +
+                          `Type: ${transaction.category}\n` +
+                          `Date: ${date}`;
+
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`;
+            window.open(twitterUrl, '_blank');
+            closeViewModal();
+        }
+
+        function shareViaEmail(id) {
+            const transaction = Storage.getTransaction(id);
+            if (!transaction) return;
+
+            const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+            });
+            const date = new Date(transaction.date).toLocaleDateString();
+            
+            const subject = 'Transaction Details';
+            const body = `Transaction Details:\n\n` +
+                        `Description: ${transaction.description}\n` +
+                        `Amount: ${amount}\n` +
+                        `Type: ${transaction.category}\n` +
+                        `Date: ${date}`;
+
+            const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoUrl;
+            closeViewModal();
+        }
+
+        // Add click event listener to close modal when clicking outside
+        document.getElementById('viewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeViewModal();
+            }
+        });
+
+        // Add event listeners for view and share buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.action-btn.view')) {
+                const card = e.target.closest('.transaction-card');
+                const id = card.querySelector('.action-btn.view').getAttribute('onclick').match(/'([^']+)'/)[1];
+                viewTransaction(id);
+            } else if (e.target.closest('.action-btn.share')) {
+                const card = e.target.closest('.transaction-card');
+                const id = card.querySelector('.action-btn.share').getAttribute('onclick').match(/'([^']+)'/)[1];
+                shareTransaction(id);
+            }
+        });
+
+        function switchType(type) {
+            const buttons = document.querySelectorAll('.type-switch .switch-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            filterTransactions();
+        }
+
+        function filterTransactions() {
+            const transactions = Storage.getAllTransactions();
+            let filteredTransactions = transactions;
+            
+            // Apply time filter
+            const timeFilter = document.getElementById('filterSelect').value;
+            switch(timeFilter) {
+                case 'today':
+                    const today = new Date().toISOString().split('T')[0];
+                    filteredTransactions = transactions.filter(t => t.date.startsWith(today));
+                    break;
+                case 'week':
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    filteredTransactions = transactions.filter(t => new Date(t.date) >= weekAgo);
+                    break;
+                case 'month':
+                    const monthAgo = new Date();
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    filteredTransactions = transactions.filter(t => new Date(t.date) >= monthAgo);
+                    break;
+            }
+            
+            // Apply type filter
+            const activeType = document.querySelector('.type-switch .switch-btn.active').textContent.toLowerCase();
+            if (activeType !== 'all') {
+                filteredTransactions = filteredTransactions.filter(t => t.category === activeType);
+            }
+            
+            displayTransactions(filteredTransactions);
+        }
+
+        function displayTransactions(transactions) {
+            const listContainer = document.getElementById('transactionsList');
+            listContainer.innerHTML = '';
+            
+            document.getElementById('transactionCount').textContent = 
+                `${transactions.length} entries`;
+
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(transaction => {
+                const transactionElement = document.createElement('div');
+                transactionElement.className = `transaction-item ${transaction.category}`;
+                
+                const date = new Date(transaction.date).toLocaleDateString();
+                const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                    style: 'currency',
+                    currency: 'INR'
+                });
+
+                transactionElement.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="transaction-description">${transaction.description}</div>
+                        <div class="transaction-date">${date}</div>
+                    </div>
+                    <div class="transaction-amount ${transaction.category}">
+                        ${amount}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn delete" onclick="deleteTransaction('${transaction.date}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+
+                listContainer.appendChild(transactionElement);
+            });
+        }
+
+        function deleteTransaction(id) {
+            if (confirm('Are you sure you want to delete this transaction?')) {
+                Storage.deleteTransaction(id);
+                updateTransactionsList();
+            }
+        }
+
+        function printHistory() {
+            const printWindow = window.open('', '', 'height=600,width=800');
+            const content = document.getElementById('transactionsList').innerHTML;
+
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Transaction History</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            .transaction-card { 
+                                margin: 10px 0;
+                                padding: 15px;
+                                border: 1px solid #eee;
+                                border-radius: 8px;
+                            }
+                            .transaction-header {
+                                display: flex;
+                                justify-content: space-between;
+                                margin-bottom: 10px;
+                            }
+                            .transaction-title {
+                                font-weight: bold;
+                            }
+                            .transaction-amount.income { color: #4CAF50; }
+                            .transaction-amount.expense { color: #F44336; }
+                            .transaction-date {
+                                color: #666;
+                                font-size: 12px;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Transaction History</h2>
+                        <div class="report-content">
+                            ${content}
+                        </div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        }
+
+        function filterByTime(timeFilter) {
+            // Update active button
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const transactions = Storage.getAllTransactions();
+            let filteredTransactions = transactions;
+            
+            switch(timeFilter) {
+                case 'daily':
+                    const today = new Date().toISOString().split('T')[0];
+                    filteredTransactions = transactions.filter(t => t.date.startsWith(today));
+                    break;
+                case 'week':
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    filteredTransactions = transactions.filter(t => new Date(t.date) >= weekAgo);
+                    break;
+                case 'month':
+                    const monthAgo = new Date();
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    filteredTransactions = transactions.filter(t => new Date(t.date) >= monthAgo);
+                    break;
+                case 'year':
+                    const yearAgo = new Date();
+                    yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+                    filteredTransactions = transactions.filter(t => new Date(t.date) >= yearAgo);
+                    break;
+            }
+            
+            // Apply type filter
+            const activeType = document.querySelector('.type-switch .switch-btn.active').textContent.toLowerCase();
+            if (activeType !== 'all') {
+                filteredTransactions = filteredTransactions.filter(t => t.category === activeType);
+            }
+            
+            displayTransactions(filteredTransactions);
+        }
+    </script>
+</body>
+</html> 

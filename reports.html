@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Book - Reports</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .header-icon {
+            font-size: 14px;
+            padding: 6px;
+            color: #666;
+        }
+        .back-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .chart-container {
+            height: 400px;
+            margin: 20px 0;
+            position: relative;
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chart-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 2;
+        }
+        .chart-center-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .chart-center-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .wallet-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .mini-wallet {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-size: 12px;
+        }
+        .wallet-icon {
+            font-size: 14px;
+        }
+        .wallet-icon.income {
+            color: #4CAF50;
+        }
+        .wallet-icon.expense {
+            color: #F44336;
+        }
+        .wallet-amount {
+            font-weight: bold;
+        }
+        .wallet-amount.income {
+            color: #4CAF50;
+        }
+        .wallet-amount.expense {
+            color: #F44336;
+        }
+        .chart-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .list-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #F44336;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        .switch-label {
+            font-size: 11px;
+            color: #666;
+        }
+        .filter-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .filter-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            background: #E3F2FD;
+            color: #1976D2;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .filter-btn.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        }
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .type-switch {
+            display: none;
+        }
+        .date-search-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .date-input:focus {
+            border-color: #2196F3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+        }
+        .search-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #2196F3;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .search-btn:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .content {
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            padding: 10px;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        .content::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+        .list-row {
+            display: flex;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        .list-row:hover {
+            background: #f8f9fa;
+        }
+        .list-cell {
+            flex: 1;
+            padding: 0 10px;
+        }
+        .list-cell.amount.income {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .list-cell.amount.expense {
+            color: #F44336;
+            font-weight: bold;
+        }
+        .list-header {
+            display: flex;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            color: #666;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .transactions-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .list-body {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        .list-body::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Back Button and Mini Wallets -->
+        <header class="header">
+            <div class="header-left">
+                <button class="back-icon header-icon" onclick="window.location.href='index.html'">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="wallet-container">
+                    <div class="mini-wallet">
+                        <div class="wallet-icon income">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div class="wallet-amount income" id="incomeBalance">₹0.00</div>
+                    </div>
+                    <div class="mini-wallet">
+                        <div class="wallet-icon expense">
+                            <i class="fas fa-minus-circle"></i>
+                        </div>
+                        <div class="wallet-amount expense" id="expenseBalance">₹0.00</div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="print-btn header-icon" onclick="printReport()">
+                    <i class="fas fa-print"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-container">
+                    <button class="filter-btn active" onclick="filterByTime('all')">All</button>
+                    <button class="filter-btn" onclick="filterByTime('daily')">Daily</button>
+                    <button class="filter-btn" onclick="filterByTime('week')">Week</button>
+                    <button class="filter-btn" onclick="filterByTime('month')">Month</button>
+                    <button class="filter-btn" onclick="filterByTime('year')">Year</button>
+                </div>
+            </div>
+
+            <!-- Main Animated Chart -->
+            <div class="chart-container">
+                <div class="chart-wrapper">
+                    <div class="chart-center">
+                        <div class="chart-center-value" id="chartTotal">₹0.00</div>
+                        <div class="chart-center-label" id="chartLabel">Total</div>
+                    </div>
+                    <canvas id="mainChart"></canvas>
+                </div>
+                <div class="chart-legend" id="chartLegend"></div>
+            </div>
+
+            <!-- Date Search Box -->
+            <div class="date-search-box">
+                <input type="date" class="date-input" id="startDate">
+                <span>to</span>
+                <input type="date" class="date-input" id="endDate">
+                <button class="search-btn" onclick="searchByDate()">Search</button>
+            </div>
+
+            <!-- Transaction List View -->
+            <div class="transactions-container" id="transactionsList">
+                <div class="list-header">
+                    <div class="header-cell">Description</div>
+                    <div class="header-cell">Date</div>
+                    <div class="header-cell">Amount</div>
+                </div>
+                <div class="list-body">
+                    <!-- Transactions will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="Storage.js"></script>
+    <script>
+        let mainChart = null;
+        let animationFrame = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeChart();
+            updateTotalBalance();
+            updateReport();
+            startLiveAnimation();
+        });
+
+        function initializeChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Income',
+                        data: [],
+                        backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                        borderColor: '#4CAF50',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 6
+                    }, {
+                        label: 'Expense',
+                        data: [],
+                        backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                        borderColor: '#F44336',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            padding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '₹' + context.parsed.y.toLocaleString('en-IN');
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            startChartAnimation();
+        }
+
+        function startChartAnimation() {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+
+            let frame = 0;
+            const animate = () => {
+                frame++;
+                
+                // Create smooth gradient for income line
+                const incomeGradient = mainChart.ctx.createLinearGradient(0, 0, 0, 400);
+                incomeGradient.addColorStop(0, 'rgba(76, 175, 80, 0.2)');
+                incomeGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                // Create smooth gradient for expense line
+                const expenseGradient = mainChart.ctx.createLinearGradient(0, 0, 0, 400);
+                expenseGradient.addColorStop(0, 'rgba(244, 67, 54, 0.2)');
+                expenseGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                mainChart.data.datasets[0].backgroundColor = incomeGradient;
+                mainChart.data.datasets[1].backgroundColor = expenseGradient;
+                
+                // Add subtle wave effect
+                const wave = Math.sin(frame / 100) * 0.02;
+                mainChart.data.datasets.forEach(dataset => {
+                    dataset.data = dataset.data.map(value => value * (1 + wave));
+                });
+                
+                mainChart.update('none');
+                animationFrame = requestAnimationFrame(animate);
+            };
+            
+            animate();
+        }
+
+        function startLiveAnimation() {
+            // Update every second
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    updateTotalBalance();
+                    updateReport();
+                    updateChartData();
+                }
+            }, 1000);
+        }
+
+        function updateTotalBalance() {
+            const transactions = Storage.getAllTransactions();
+            const income = transactions
+                .filter(t => t.category === 'income')
+                .reduce((total, t) => total + parseFloat(t.amount), 0);
+            
+            const expense = transactions
+                .filter(t => t.category === 'expense')
+                .reduce((total, t) => total + parseFloat(t.amount), 0);
+
+            document.getElementById('incomeBalance').textContent = '₹' + income.toLocaleString('en-IN');
+            document.getElementById('expenseBalance').textContent = '₹' + expense.toLocaleString('en-IN');
+        }
+
+        function updateReport() {
+            const transactions = Storage.getAllTransactions();
+            const activeTimeFilter = document.querySelector('.filter-btn.active').textContent.toLowerCase();
+            let filteredTransactions = filterTransactions(transactions, activeTimeFilter);
+            updateChartData(filteredTransactions);
+            updateTransactionsList(filteredTransactions);
+        }
+
+        function filterTransactions(transactions, timeFilter) {
+            let filtered = transactions;
+            
+            switch(timeFilter) {
+                case 'daily':
+                    const today = new Date().toISOString().split('T')[0];
+                    filtered = transactions.filter(t => t.date.startsWith(today));
+                    break;
+                case 'week':
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    filtered = transactions.filter(t => new Date(t.date) >= weekAgo);
+                    break;
+                case 'month':
+                    const monthAgo = new Date();
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    filtered = transactions.filter(t => new Date(t.date) >= monthAgo);
+                    break;
+                case 'year':
+                    const yearAgo = new Date();
+                    yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+                    filtered = transactions.filter(t => new Date(t.date) >= yearAgo);
+                    break;
+            }
+            
+            return filtered;
+        }
+
+        function updateChartData(transactions) {
+            // Group transactions by date
+            const groupedTransactions = transactions.reduce((acc, t) => {
+                const date = new Date(t.date).toLocaleDateString();
+                if (!acc[date]) {
+                    acc[date] = { income: 0, expense: 0 };
+                }
+                if (t.category === 'income') {
+                    acc[date].income += parseFloat(t.amount);
+                } else {
+                    acc[date].expense += parseFloat(t.amount);
+                }
+                return acc;
+            }, {});
+
+            // Sort by date
+            const sortedDates = Object.keys(groupedTransactions).sort((a, b) => new Date(a) - new Date(b));
+
+            // Update chart data
+            mainChart.data.labels = sortedDates;
+            mainChart.data.datasets[0].data = sortedDates.map(date => groupedTransactions[date].income);
+            mainChart.data.datasets[1].data = sortedDates.map(date => groupedTransactions[date].expense);
+
+            // Update center value
+            const totalIncome = mainChart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+            const totalExpense = mainChart.data.datasets[1].data.reduce((a, b) => a + b, 0);
+            document.getElementById('chartTotal').textContent = '₹' + (totalIncome - totalExpense).toLocaleString('en-IN');
+            document.getElementById('chartLabel').textContent = 'Net Balance';
+
+            mainChart.update('active');
+        }
+
+        function updateTransactionsList(transactions) {
+            const listBody = document.querySelector('.list-body');
+            listBody.innerHTML = '';
+
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(transaction => {
+                const date = new Date(transaction.date).toLocaleDateString();
+                const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                    style: 'currency',
+                    currency: 'INR'
+                });
+
+                const row = document.createElement('div');
+                row.className = 'list-row';
+                row.innerHTML = `
+                    <div class="list-cell description">${transaction.description}</div>
+                    <div class="list-cell date">${date}</div>
+                    <div class="list-cell amount ${transaction.category}">${amount}</div>
+                `;
+
+                listBody.appendChild(row);
+            });
+        }
+
+        function printReport() {
+            const printWindow = window.open('', '', 'height=600,width=800');
+            const content = document.getElementById('transactionsList').innerHTML;
+
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            .list-row { 
+                                display: flex; 
+                                padding: 10px;
+                                border-bottom: 1px solid #eee;
+                            }
+                            .list-cell { flex: 1; }
+                            .amount.income { color: #4CAF50; }
+                            .amount.expense { color: #F44336; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Report</h2>
+                        <div class="report-content">
+                            ${content}
+                        </div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        }
+
+        function filterByTime(timeFilter) {
+            // Update active button
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const transactions = Storage.getAllTransactions();
+            let filteredTransactions = transactions;
+            
+            switch(timeFilter) {
+                case 'daily':
+                    const today = new Date().toISOString().split('T')[0];
+                    filteredTransactions = transactions.filter(t => t.date.startsWith(today));
+                    break;
+                case 'week':
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    filteredTransactions = transactions.filter(t => new Date(t.date) >= weekAgo);
+                    break;
+                case 'month':
+                    const monthAgo = new Date();
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    filteredTransactions = transactions.filter(t => new Date(t.date) >= monthAgo);
+                    break;
+                case 'year':
+                    const yearAgo = new Date();
+                    yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+                    filteredTransactions = transactions.filter(t => new Date(t.date) >= yearAgo);
+                    break;
+            }
+            
+            displayTransactions(filteredTransactions);
+        }
+
+        function searchByDate() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+
+            const transactions = Storage.getAllTransactions();
+            const filteredTransactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                return transactionDate >= start && transactionDate <= end;
+            });
+
+            updateChartData(filteredTransactions);
+            updateTransactionsList(filteredTransactions);
+        }
+    </script>
+</body>
+</html> 

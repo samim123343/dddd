@@ -3,103 +3,1069 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cashbook App</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Cash Book - Home</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Unity Ads Script -->
-    <script src="https://cdn.unityads.unity3d.com/unity-ads.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .mini-wallet {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #f5f5f5;
+            min-width: 80px;
+        }
+
+        .mini-wallet.income {
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .mini-wallet.expense {
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .wallet-icon {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .mini-wallet.income .wallet-icon {
+            color: #4CAF50;
+        }
+
+        .mini-wallet.expense .wallet-icon {
+            color: #F44336;
+        }
+
+        .wallet-amount {
+            font-size: 11px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .mini-wallet.income .wallet-amount {
+            color: #4CAF50;
+        }
+
+        .mini-wallet.expense .wallet-amount {
+            color: #F44336;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-icon {
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding: 6px;
+            background: #f5f5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+        }
+
+        .search-icon:hover {
+            color: #2196F3;
+            background: #e3f2fd;
+        }
+
+        .content {
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            padding: 10px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .transactions-list {
+            margin-top: 5px;
+            background: none;
+            box-shadow: none;
+            border-radius: 0;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .transactions-list::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-wrapper {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            height: 350px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #2196F3, #F44336);
+        }
+
+        .chart-title {
+            position: absolute;
+            top: 20px;
+            left: 25px;
+            font-size: 18px;
+            color: #333;
+            font-weight: 600;
+            z-index: 1;
+        }
+
+        .chart-type-buttons {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            display: flex;
+            gap: 10px;
+            z-index: 1;
+        }
+
+        .chart-type-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chart-type-btn:hover {
+            background: #e3f2fd;
+            color: #2196F3;
+        }
+
+        .chart-type-btn.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+            margin-top: 20px;
+        }
+
+        .transactions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .transactions-header h3 {
+            font-size: 17px;
+            color: #333;
+            margin: 0;
+        }
+
+        .transaction-count {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-description {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .transaction-date {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .transaction-amount {
+            font-size: 15px;
+            font-weight: 500;
+            margin: 0 15px;
+        }
+
+        .transaction-amount.income {
+            color: #4CAF50;
+        }
+
+        .transaction-amount.expense {
+            color: #F44336;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-buttons button {
+            background: none;
+            border: none;
+            padding: 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .action-buttons button:hover {
+            background-color: #f5f5f5;
+        }
+
+        .action-buttons i {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .search-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            z-index: 999;
+            display: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #2196F3;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- Top Header with Wallets -->
+        <!-- Header with Back Button and Mini Wallet -->
         <header class="header">
-            <!-- Unity Ads Banner -->
-            <div class="ad-container">
-                <div id="unity-ad-banner"></div>
+            <div class="header-left">
+                <div class="mini-wallet">
+                    <div class="wallet-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="wallet-amount" id="totalBalance">₹0.00</div>
+                </div>
+                <div class="mini-wallet income">
+                    <div class="wallet-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="wallet-amount" id="incomeBalance">₹0.00</div>
+                </div>
+                <div class="mini-wallet expense">
+                    <div class="wallet-icon">
+                        <i class="fas fa-minus-circle"></i>
+                    </div>
+                    <div class="wallet-amount" id="expenseBalance">₹0.00</div>
+                </div>
             </div>
-            <div class="wallets">
-                <div class="wallet active">
-                    <h3>Main Wallet</h3>
-                    <p class="balance">৳0.00</p>
-                </div>
-                <div class="wallet">
-                    <h3>Savings</h3>
-                    <p class="balance">৳0.00</p>
-                </div>
-                <div class="wallet">
-                    <h3>Business</h3>
-                    <p class="balance">৳0.00</p>
-                </div>
+            <div class="header-right">
+                <i class="fas fa-search search-icon"></i>
+                <button class="history-btn header-icon" onclick="window.location.href='history.html'">
+                    <i class="fas fa-history"></i>
+                </button>
             </div>
         </header>
 
-        <!-- Filter Buttons -->
-        <div class="filter-buttons">
-            <button class="filter-btn active">All</button>
-            <button class="filter-btn">Week</button>
-            <button class="filter-btn">Month</button>
-            <button class="filter-btn">Year</button>
+        <div class="search-container" id="searchContainer">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search transactions...">
         </div>
 
-        <!-- Transaction History -->
-        <div class="transaction-history">
-            <h2>Transaction History</h2>
-            <div class="transactions" id="transactions">
-                <!-- Transactions will be added here dynamically -->
+        <div class="content">
+            <!-- Filter Buttons -->
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="week">Week</button>
+                <button class="filter-btn" data-filter="month">Month</button>
+                <button class="filter-btn" data-filter="year">Year</button>
             </div>
-        </div>
 
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            <button class="cash-in-btn" id="cashInBtn">
-                <i class="fas fa-plus"></i> Cash In
-            </button>
-            <button class="cash-out-btn" id="cashOutBtn">
-                <i class="fas fa-minus"></i> Cash Out
-            </button>
-        </div>
+            <!-- Main Buttons Container -->
+            <div class="main-buttons-container">
+                <button class="main-btn small" id="addCashBtn">
+                    <i class="fas fa-plus"></i>
+                    Add Cash
+                </button>
+                <button class="main-btn small" id="reportsBtn">
+                    <i class="fas fa-chart-bar"></i>
+                    Reports
+                </button>
+                <button class="main-btn small" id="historyBtn">
+                    <i class="fas fa-history"></i>
+                    History
+                </button>
+            </div>
 
-        <!-- Cash In/Out Form Modal -->
-        <div class="modal" id="transactionModal">
-            <div class="modal-content">
-                <span class="close-btn" id="closeModal">&times;</span>
-                <h2 id="modalTitle">Cash In</h2>
-                <form id="transactionForm">
-                    <div class="form-group">
-                        <label for="amount">Amount (৳)</label>
-                        <input type="number" id="amount" required>
+            <!-- Add Cash Form (Hidden by default) -->
+            <div class="add-cash-form" id="addCashForm">
+                <div class="form-content">
+                    <div class="form-header">
+                        <h3>Add Transaction</h3>
+                        <button type="button" class="close-btn" onclick="closeForm()">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <div class="category-container">
-                            <select id="category" required>
-                                <option value="">Select Category</option>
-                                <option value="salary">Salary</option>
-                                <option value="business">Business</option>
-                                <option value="food">Food</option>
-                                <option value="transport">Transport</option>
-                                <option value="shopping">Shopping</option>
-                            </select>
-                            <button type="button" class="add-category-btn" id="addCategoryBtn">
-                                <i class="fas fa-plus"></i>
-                            </button>
+                    <form id="transactionForm">
+                        <div class="form-group date-time">
+                            <div class="date-field">
+                                <label for="date">Date</label>
+                                <input type="date" id="date" required>
+                            </div>
+                            <div class="time-field">
+                                <label for="time">Time</label>
+                                <input type="time" id="time" required>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Available Categories</label>
-                        <div class="category-list" id="categoryList">
-                            <!-- Categories will be added here dynamically -->
+                        <div class="form-group">
+                            <label for="amount">Amount</label>
+                            <div class="amount-input">
+                                <span class="currency">₹</span>
+                                <input type="number" id="amount" placeholder="0.00" required>
+                            </div>
                         </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <input type="text" id="description" placeholder="Add note" required>
+                        </div>
+                        <div class="form-footer">
+                            <div class="type-switch">
+                                <span class="switch-label expense-label">Cash Out</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="categorySwitch">
+                                    <span class="slider round"></span>
+                                </label>
+                                <span class="switch-label income-label">Cash In</span>
+                            </div>
+                            <button type="submit" class="save-btn">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Latest Transactions -->
+            <div class="latest-transactions">
+                <div class="transactions-header">
+                    <h3>Latest Transactions</h3>
+                    <div class="transaction-count" id="transactionCount">0 entries</div>
+                </div>
+                <div class="transactions-list" id="latestTransactionsList">
+                    <!-- Transactions will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Combined Chart Section -->
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <div class="chart-title">Transaction Overview</div>
+                    <div class="chart-type-buttons">
+                        <button class="chart-type-btn active" data-type="balance">Balance</button>
+                        <button class="chart-type-btn" data-type="income">Income</button>
+                        <button class="chart-type-btn" data-type="expense">Expense</button>
                     </div>
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="submit-btn">Submit</button>
-                </form>
+                    <canvas id="combinedChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <!-- View Transaction Modal -->
+    <div class="view-modal" id="viewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>ট্রানজেকশন বিস্তারিত</h3>
+                <button type="button" class="close-btn" onclick="closeViewModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="viewModalBody">
+                <!-- Transaction details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="Storage.js"></script>
+    <script>
+        // Clear all data on first load
+        if (!localStorage.getItem('dataInitialized')) {
+            localStorage.clear();
+            localStorage.setItem('dataInitialized', 'true');
+        }
+
+        function updateWalletAmounts() {
+            const transactions = Storage.getAllTransactions();
+            let totalBalance = 0;
+            let incomeBalance = 0;
+            let expenseBalance = 0;
+
+            transactions.forEach(transaction => {
+                const amount = parseFloat(transaction.amount);
+                if (transaction.category === 'income') {
+                    incomeBalance += amount;
+                    totalBalance += amount;
+                } else {
+                    expenseBalance += amount;
+                    totalBalance -= amount;
+                }
+            });
+
+            document.getElementById('totalBalance').textContent = 
+                new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0
+                }).format(totalBalance);
+
+            document.getElementById('incomeBalance').textContent = 
+                new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0
+                }).format(incomeBalance);
+
+            document.getElementById('expenseBalance').textContent = 
+                new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0
+                }).format(expenseBalance);
+        }
+
+        function loadLatestTransactions(transactions = Storage.getAllTransactions()) {
+            const listContainer = document.getElementById('latestTransactionsList');
+            listContainer.innerHTML = '';
+            
+            document.getElementById('transactionCount').textContent = 
+                `${transactions.length} entries`;
+
+            transactions.forEach(transaction => {
+                const transactionElement = document.createElement('div');
+                transactionElement.className = `transaction-item ${transaction.category}`;
+                
+                const date = new Date(transaction.date).toLocaleDateString();
+                const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                    style: 'currency',
+                    currency: 'INR'
+                });
+
+                transactionElement.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="transaction-description">${transaction.description}</div>
+                        <div class="transaction-date">${date}</div>
+                    </div>
+                    <div class="transaction-amount ${transaction.category}">
+                        ${amount}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="view-btn" data-date="${transaction.date}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="delete-btn" data-date="${transaction.date}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+
+                // Add click event listener for view button
+                const viewBtn = transactionElement.querySelector('.view-btn');
+                viewBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const transactionDate = this.getAttribute('data-date');
+                    viewTransaction(transactionDate);
+                });
+
+                // Add click event listener for delete button
+                const deleteBtn = transactionElement.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const transactionDate = this.getAttribute('data-date');
+                    deleteTransaction(transactionDate);
+                });
+
+                listContainer.appendChild(transactionElement);
+            });
+
+            updateWalletAmounts();
+        }
+
+        function deleteTransaction(transactionDate) {
+            if (confirm('আপনি কি নিশ্চিত যে এই ট্রানজেকশনটি মুছে ফেলতে চান?')) {
+                const transactions = Storage.getAllTransactions();
+                const updatedTransactions = transactions.filter(t => t.date !== transactionDate);
+                localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+                loadLatestTransactions(updatedTransactions);
+                updateCharts();
+            }
+        }
+
+        function viewTransaction(transactionDate) {
+            const transactions = Storage.getAllTransactions();
+            const transaction = transactions.find(t => t.date === transactionDate);
+            
+            if (transaction) {
+                const date = new Date(transaction.date).toLocaleString();
+                const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                    style: 'currency',
+                    currency: 'INR'
+                });
+
+                const modalBody = document.getElementById('viewModalBody');
+                modalBody.innerHTML = `
+                    <div class="transaction-detail">
+                        <div class="detail-row">
+                            <span class="detail-label">বিবরণ:</span>
+                            <span class="detail-value">${transaction.description}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">পরিমাণ:</span>
+                            <span class="detail-value ${transaction.category}">${amount}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">ধরন:</span>
+                            <span class="detail-value">${transaction.category === 'income' ? 'আয়' : 'ব্যয়'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">তারিখ ও সময়:</span>
+                            <span class="detail-value">${date}</span>
+                        </div>
+                    </div>
+                `;
+
+                const viewModal = document.getElementById('viewModal');
+                viewModal.style.display = 'flex';
+                setTimeout(() => {
+                    viewModal.classList.add('show');
+                }, 10);
+            }
+        }
+
+        function closeViewModal() {
+            const viewModal = document.getElementById('viewModal');
+            viewModal.classList.remove('show');
+            setTimeout(() => {
+                viewModal.style.display = 'none';
+            }, 300);
+        }
+
+        // Close view modal when clicking outside
+        document.getElementById('viewModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeViewModal();
+            }
+        });
+
+        // Form submission handler
+        document.getElementById('transactionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const amount = document.getElementById('amount').value;
+            const categorySwitch = document.getElementById('categorySwitch');
+            const category = categorySwitch.checked ? 'income' : 'expense';
+            const description = document.getElementById('description').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            
+            const dateTime = new Date(`${date}T${time}`);
+            
+            const transaction = {
+                amount,
+                category,
+                description,
+                date: dateTime.toISOString()
+            };
+            
+            Storage.addTransaction(transaction);
+            e.target.reset();
+            closeForm();
+            loadLatestTransactions();
+            updateCharts();
+        });
+
+        // Filter button functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    const filter = this.getAttribute('data-filter');
+                    const transactions = Storage.getAllTransactions();
+                    let filteredTransactions = [...transactions];
+                    const currentDate = new Date();
+                    
+                    switch(filter) {
+                        case 'week':
+                            const weekAgo = new Date();
+                            weekAgo.setDate(currentDate.getDate() - 7);
+                            filteredTransactions = transactions.filter(t => new Date(t.date) >= weekAgo);
+                            break;
+                        case 'month':
+                            const monthAgo = new Date();
+                            monthAgo.setMonth(currentDate.getMonth() - 1);
+                            filteredTransactions = transactions.filter(t => new Date(t.date) >= monthAgo);
+                            break;
+                        case 'year':
+                            const yearAgo = new Date();
+                            yearAgo.setFullYear(currentDate.getFullYear() - 1);
+                            filteredTransactions = transactions.filter(t => new Date(t.date) >= yearAgo);
+                            break;
+                    }
+                    
+                    // Update latest transactions list
+                    const listContainer = document.getElementById('latestTransactionsList');
+                    listContainer.innerHTML = '';
+                    
+                    filteredTransactions
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .slice(0, 7)
+                        .forEach(transaction => {
+                            const transactionElement = document.createElement('div');
+                            transactionElement.className = `transaction-item ${transaction.category}`;
+                            
+                            const date = new Date(transaction.date).toLocaleDateString();
+                            const amount = parseFloat(transaction.amount).toLocaleString('en-IN', {
+                                style: 'currency',
+                                currency: 'INR'
+                            });
+
+                            transactionElement.innerHTML = `
+                                <div class="transaction-info">
+                                    <div class="transaction-description">${transaction.description}</div>
+                                    <div class="transaction-date">${date}</div>
+                                </div>
+                                <div class="transaction-amount ${transaction.category}">
+                                    ${amount}
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="view-btn" data-date="${transaction.date}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="delete-btn" data-date="${transaction.date}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+
+                            // Add click event listener for view button
+                            const viewBtn = transactionElement.querySelector('.view-btn');
+                            viewBtn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                const transactionDate = this.getAttribute('data-date');
+                                viewTransaction(transactionDate);
+                            });
+
+                            // Add click event listener for delete button
+                            const deleteBtn = transactionElement.querySelector('.delete-btn');
+                            deleteBtn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                const transactionDate = this.getAttribute('data-date');
+                                deleteTransaction(transactionDate);
+                            });
+
+                            listContainer.appendChild(transactionElement);
+                        });
+                    
+                    // Update transaction count
+                    document.getElementById('transactionCount').textContent = 
+                        `${filteredTransactions.length} entries`;
+                    
+                    // Update charts with filtered data
+                    updateChartsWithFilteredData(filteredTransactions);
+                });
+            });
+        });
+
+        // Initialize everything when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLatestTransactions();
+            
+            // Initialize charts with animations
+            const transactions = Storage.getAllTransactions();
+            
+            // Combined chart initialization
+            const ctx = document.getElementById('combinedChart').getContext('2d');
+            const combinedChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: calculateBalanceData(transactions).labels,
+                    datasets: [{
+                        label: 'Balance',
+                        data: calculateBalanceData(transactions).values,
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#4CAF50',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#4CAF50',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2
+                    }, {
+                        label: 'Income',
+                        data: calculateIncomeData(transactions).values,
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#2196F3',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#2196F3',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2
+                    }, {
+                        label: 'Expense',
+                        data: calculateExpenseData(transactions).values,
+                        borderColor: '#F44336',
+                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#F44336',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#F44336',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 20,
+                                font: {
+                                    size: 13,
+                                    weight: '500'
+                                },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: '600'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ₹${context.raw.toLocaleString('en-IN')}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                },
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString('en-IN');
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                }
+            });
+
+            // Chart type switching
+            document.querySelectorAll('.chart-type-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.chart-type-btn').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const type = this.getAttribute('data-type');
+                    const datasets = combinedChart.data.datasets;
+                    
+                    datasets.forEach(dataset => {
+                        dataset.hidden = dataset.label.toLowerCase() !== type;
+                    });
+                    
+                    combinedChart.update();
+                });
+            });
+
+            window.combinedChart = combinedChart;
+        });
+
+        // Navigation
+        document.getElementById('reportsBtn').addEventListener('click', () => {
+            window.location.href = 'reports.html';
+        });
+
+        document.getElementById('historyBtn').addEventListener('click', () => {
+            window.location.href = 'history.html';
+        });
+
+        // Add Cash Form Toggle with Animation
+        document.getElementById('addCashBtn').addEventListener('click', () => {
+            const form = document.getElementById('addCashForm');
+            const now = new Date();
+            
+            // Set current date and time
+            document.getElementById('date').valueAsDate = now;
+            document.getElementById('time').value = now.toTimeString().slice(0, 5);
+            
+            form.style.display = 'flex';
+            setTimeout(() => {
+                form.classList.add('show');
+            }, 10);
+        });
+
+        // Close form when clicking outside
+        document.getElementById('addCashForm').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeForm();
+            }
+        });
+
+        function closeForm() {
+            const form = document.getElementById('addCashForm');
+            form.classList.remove('show');
+            setTimeout(() => {
+                form.style.display = 'none';
+            }, 300);
+        }
+
+        function updateCharts() {
+            const transactions = Storage.getAllTransactions();
+            const combinedChart = Chart.getChart('combinedChart');
+            
+            if (combinedChart) {
+                combinedChart.data.labels = calculateBalanceData(transactions).labels;
+                combinedChart.data.datasets[0].data = calculateBalanceData(transactions).values;
+                combinedChart.data.datasets[1].data = calculateIncomeData(transactions).values;
+                combinedChart.data.datasets[2].data = calculateExpenseData(transactions).values;
+                combinedChart.update({
+                    duration: 800,
+                    easing: 'easeInOutQuart'
+                });
+            }
+        }
+
+        function updateChartsWithFilteredData(filteredTransactions) {
+            const combinedChart = Chart.getChart('combinedChart');
+            
+            if (combinedChart) {
+                combinedChart.data.labels = calculateBalanceData(filteredTransactions).labels;
+                combinedChart.data.datasets[0].data = calculateBalanceData(filteredTransactions).values;
+                combinedChart.data.datasets[1].data = calculateIncomeData(filteredTransactions).values;
+                combinedChart.data.datasets[2].data = calculateExpenseData(filteredTransactions).values;
+                combinedChart.update({
+                    duration: 800,
+                    easing: 'easeInOutQuart'
+                });
+            }
+        }
+
+        function calculateBalanceData(transactions) {
+            // Calculate cumulative balance over time
+            let balance = 0;
+            const data = transactions
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .reduce((acc, t) => {
+                    balance += t.category === 'income' ? parseFloat(t.amount) : -parseFloat(t.amount);
+                    const date = new Date(t.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+                    if (!acc.labels.includes(date)) {
+                        acc.labels.push(date);
+                        acc.values.push(balance);
+                    } else {
+                        acc.values[acc.values.length - 1] = balance;
+                    }
+                    return acc;
+                }, { labels: [], values: [] });
+            
+            return data;
+        }
+
+        function calculateIncomeData(transactions) {
+            // Calculate income by month
+            const data = transactions
+                .filter(t => t.category === 'income')
+                .reduce((acc, t) => {
+                    const date = new Date(t.date).toLocaleDateString('en-IN', { month: 'short' });
+                    if (!acc.labels.includes(date)) {
+                        acc.labels.push(date);
+                        acc.values.push(parseFloat(t.amount));
+                    } else {
+                        const index = acc.labels.indexOf(date);
+                        acc.values[index] += parseFloat(t.amount);
+                    }
+                    return acc;
+                }, { labels: [], values: [] });
+            
+            return data;
+        }
+
+        function calculateExpenseData(transactions) {
+            // Calculate expenses by category
+            const data = transactions
+                .filter(t => t.category === 'expense')
+                .reduce((acc, t) => {
+                    const category = t.description.split(' ')[0];
+                    if (!acc.labels.includes(category)) {
+                        acc.labels.push(category);
+                        acc.values.push(parseFloat(t.amount));
+                    } else {
+                        const index = acc.labels.indexOf(category);
+                        acc.values[index] += parseFloat(t.amount);
+                    }
+                    return acc;
+                }, { labels: [], values: [] });
+            
+            return data;
+        }
+
+        // Search functionality
+        document.querySelector('.search-icon').addEventListener('click', function() {
+            const searchContainer = document.getElementById('searchContainer');
+            searchContainer.style.display = searchContainer.style.display === 'none' ? 'block' : 'none';
+            if (searchContainer.style.display === 'block') {
+                document.getElementById('searchInput').focus();
+            }
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const transactions = Storage.getAllTransactions();
+            const filteredTransactions = transactions.filter(transaction => 
+                transaction.description.toLowerCase().includes(searchTerm) ||
+                transaction.amount.toString().includes(searchTerm) ||
+                new Date(transaction.date).toLocaleDateString().includes(searchTerm)
+            );
+            loadLatestTransactions(filteredTransactions);
+        });
+    </script>
 </body>
 </html> 
